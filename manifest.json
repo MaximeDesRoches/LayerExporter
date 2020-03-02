@@ -1,0 +1,7 @@
+{
+  "name": "Layer Exporter",
+  "id": "816334701023628137",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html"
+}
