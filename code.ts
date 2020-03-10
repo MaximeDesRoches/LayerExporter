@@ -1,4 +1,4 @@
-figma.showUI(__html__);
+figma.showUI(__html__, { width: 300, height: 300 });
 
 function getArtwork(format:'PNG'|'JPG' = 'PNG', resolution = "2"):Promise<{selected, data}[]> {
 	return new Promise(resolve => {
@@ -39,13 +39,15 @@ figma.ui.onmessage = (message) => {
 	if (action === 'export') {
 		const {
 			format,
-			resolution
+			resolution,
+			quality,
 		} = data;
 
-		console.log(data);
 		getArtwork(format, resolution).then(images => {
 			const messages = images.map(image => {
 				const selected:SceneNode = image.selected;
+
+				console.log(image.selected);
 	
 				const frame = getFrame(selected);
 				let { x, y } = getPosition(selected, frame, parseInt(resolution, 10));
@@ -57,6 +59,7 @@ figma.ui.onmessage = (message) => {
 					name: selected.name,
 					format,
 					resolution,
+					quality,
 					rect: {
 						x,
 						y,
@@ -65,6 +68,8 @@ figma.ui.onmessage = (message) => {
 					},
 				};
 			});
+
+			console.log(messages);
 
 			figma.ui.postMessage({
 				images: messages,

@@ -36,6 +36,12 @@
 				</select>
 			</div>
 		</div>
+		<div class="col-6">
+			<div class="form-group">
+				<label for="quality">Quality</label>
+				<input class="form-control" type="number" min="0" max="0" step="0.1" id="quality" value="0.8">
+			</div>
+		</div>
 	</div>
 
 	<div class="row">
@@ -53,18 +59,17 @@
 				data: {
 					format: document.getElementById('format').value,
 					resolution: document.getElementById('resolution').value,
+					quality: document.getElementById('quality').value,
 				}
 			}),
 		}, '*');
 	}
 
-	async function encode(canvas, ctx, imageData, rect, format = 'PNG') {
+	function encode(canvas, ctx, imageData, rect, format = 'PNG', quality = 0.8) {
 		ctx.putImageData(imageData, 0, 0);
-		return await new Promise((resolve, reject) => {
-			canvas.toBlob(blob => {
-				resolve(blob);
-			}, 'image/' + format.toLowerCase());
-		});
+		const f = 'image/' + format.toLowerCase().replace('jpg', 'jpeg');
+		console.log(f, parseFloat(quality, 10));
+		return canvas.toDataURL(f, parseFloat(quality, 10));
 	}
 
 	async function decode(canvas, ctx, bytes, rect, format = 'PNG') {
@@ -110,12 +115,12 @@
 			const ctx = canvas.getContext('2d');
 			
 			const data = image.data;
-			const { rect, name, format, resolution } = image;
-	
+			const { rect, name, format, resolution, quality } = image;
+
 			const imageData = await decode(canvas, ctx, data, rect, format);
-			const newBytes = await encode(canvas, ctx, imageData, rect, format);
+			const newBytes = encode(canvas, ctx, imageData, rect, format, quality);
 			
-			return { name, format, url: URL.createObjectURL(newBytes) };
+			return { name, format, url: newBytes };
 		})).then(files => {
 			Promise.mapSeries(files, downloadFile).catch(e => console.error(e));
 		})
