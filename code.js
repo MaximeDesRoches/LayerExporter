@@ -7,10 +7,18 @@ function getArtwork(format = 'PNG', resolution = "2") {
             return;
         try {
             Promise.all(selection.map((selected) => {
-                return selected.exportAsync({ format, constraint: { type: 'SCALE', value: parseInt(resolution, 10) } })
+                let node = selected;
+                if (node.type === 'TEXT') {
+                    const cloned = node.clone();
+                    const parent = node.parent;
+                    parent.appendChild(cloned);
+                    node = figma.flatten([cloned]);
+                    cloned.remove();
+                }
+                return node.exportAsync({ format, constraint: { type: 'SCALE', value: parseInt(resolution, 10) } })
                     .then(data => {
                     return {
-                        selected,
+                        selected: node,
                         data
                     };
                 });
@@ -41,7 +49,6 @@ figma.ui.onmessage = (message) => {
         getArtwork(format, resolution).then(images => {
             const messages = images.map(image => {
                 const selected = image.selected;
-                console.log(image.selected);
                 const frame = getFrame(selected);
                 let { x, y } = getPosition(selected, frame, parseInt(resolution, 10));
                 x *= resolution;
