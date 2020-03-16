@@ -13,7 +13,7 @@ function getArtwork(format = 'PNG', resolution = "2") {
                     const parent = node.parent;
                     parent.appendChild(cloned);
                     node = figma.flatten([cloned]);
-                    cloned.remove();
+                    // cloned.remove();
                 }
                 return node.exportAsync({ format, constraint: { type: 'SCALE', value: parseInt(resolution, 10) } })
                     .then(data => {
